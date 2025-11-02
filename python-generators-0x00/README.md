@@ -1,0 +1,1 @@
+this directory demonstrates how to use databases and generators in python
