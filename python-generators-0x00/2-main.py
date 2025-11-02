@@ -1,0 +1,10 @@
+#!/usr/bin/python3
+import sys
+processing = __import__('1-batch_processing')
+
+# Print processed users in a batch of 50
+try:
+    processing.batch_processing(50)
+except BrokenPipeError:
+    # Prevent crash when output is piped with head
+    sys.stderr.close()
