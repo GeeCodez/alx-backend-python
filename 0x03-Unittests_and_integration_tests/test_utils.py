@@ -6,8 +6,9 @@ various paths.
 """
 
 import unittest
+from unittest.mock import patch, Mock
+from utils import get_json,access_nested_map
 from parameterized import parameterized
-from utils import access_nested_map
 
 
 class TestAccessNestedMap(unittest.TestCase):
@@ -49,11 +50,6 @@ Unit tests for the utils.get_json function.
 It mocks HTTP calls to test that get_json returns the expected payload
 without making real network requests.
 """
-
-import unittest
-from unittest.mock import patch, Mock
-from utils import get_json
-from parameterized import parameterized
 
 
 class TestGetJson(unittest.TestCase):
