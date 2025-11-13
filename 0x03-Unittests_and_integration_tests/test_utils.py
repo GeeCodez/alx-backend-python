@@ -6,6 +6,7 @@ for correct payloads using mocked HTTP calls.
 """
 
 import unittest
+from typing import Any
 from parameterized import parameterized
 from unittest.mock import patch, Mock
 from utils import access_nested_map, get_json
@@ -23,16 +24,12 @@ class TestAccessNestedMap(unittest.TestCase):
         ({"a": {"b": 2}}, ("a",), {"b": 2}),
         ({"a": {"b": 2}}, ("a", "b"), 2),
     ])
-    def test_access_nested_map(self, nested_map: dict, path: tuple, expected: object) -> None:
+    def test_access_nested_map(self, nested_map: dict, path: tuple, expected: Any) -> None:
         """
         Test that access_nested_map returns the expected value given a nested
         map and a sequence of keys representing the path to the value.
         """
-        self.assertEqual(
-            access_nested_map(nested_map, path),
-            expected,
-            f"{nested_map} following {path} must return {expected}"
-        )
+        self.assertEqual(access_nested_map(nested_map, path), expected)
 
     @parameterized.expand([
         ({}, ('a',)),
@@ -64,16 +61,11 @@ class TestGetJson(unittest.TestCase):
         Test that get_json returns the expected dictionary for a given URL
         by mocking requests.get so no real HTTP call is made.
         """
-        # Configure the mock to return a response with .json() = test_payload
         mock_response = Mock()
         mock_response.json.return_value = test_payload
         mock_get.return_value = mock_response
 
-        # Call the function (it uses the mocked requests.get)
         result = get_json(test_url)
 
-        # Assert that requests.get was called exactly once with test_url
         mock_get.assert_called_once_with(test_url)
-
-        # Assert that the returned result matches the expected payload
         self.assertEqual(result, test_payload)
