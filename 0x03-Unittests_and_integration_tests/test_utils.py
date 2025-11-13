@@ -1,21 +1,21 @@
 #!/usr/bin/env python3
 """
-This module contains unit tests for the utils.access_nested_map function,
-verifying that it correctly retrieves values from nested dictionaries for
-various paths.
+Unit tests for the utils module.
+It tests access_nested_map for valid and invalid paths and get_json
+for correct payloads using mocked HTTP calls.
 """
 
 import unittest
-from unittest.mock import patch, Mock
-from utils import get_json,access_nested_map
 from parameterized import parameterized
+from unittest.mock import patch, Mock
+from utils import access_nested_map, get_json
 
 
 class TestAccessNestedMap(unittest.TestCase):
     """
     Test class for the access_nested_map function.
     It checks that the function returns the correct value for different
-    nested maps and paths.
+    nested maps and paths and raises KeyError for invalid paths.
     """
 
     @parameterized.expand([
@@ -28,9 +28,12 @@ class TestAccessNestedMap(unittest.TestCase):
         Test that access_nested_map returns the expected value given a nested
         map and a sequence of keys representing the path to the value.
         """
-        self.assertEqual(access_nested_map(nested_map, path), expected, f"{nested_map} following a sequence {path} must return {expected}")
+        self.assertEqual(
+            access_nested_map(nested_map, path),
+            expected,
+            f"{nested_map} following {path} must return {expected}"
+        )
 
-    #testing the exceptions using the same parameterized.expand method
     @parameterized.expand([
         ({}, ('a',)),
         ({'a': 1}, ('a', 'b')),
@@ -44,19 +47,11 @@ class TestAccessNestedMap(unittest.TestCase):
             access_nested_map(nested_map, path)
 
 
-#!/usr/bin/env python3
-"""
-Unit tests for the utils.get_json function.
-It mocks HTTP calls to test that get_json returns the expected payload
-without making real network requests.
-"""
-
-
 class TestGetJson(unittest.TestCase):
     """
     Test class for the get_json function.
-    It checks that get_json returns the correct dictionary and that
-    requests.get is called exactly once with the correct URL.
+    It mocks HTTP calls to test that get_json returns the expected payload
+    without making real network requests.
     """
 
     @parameterized.expand([
@@ -82,5 +77,3 @@ class TestGetJson(unittest.TestCase):
 
         # Assert that the returned result matches the expected payload
         self.assertEqual(result, test_payload)
-
-
