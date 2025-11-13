@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Unit tests for the utils module.
-Tests access_nested_map for valid and invalid paths and get_json
+It tests access_nested_map for valid and invalid paths and get_json
 for correct payloads using mocked HTTP calls.
 """
 
@@ -15,8 +15,8 @@ from utils import access_nested_map, get_json
 class TestAccessNestedMap(unittest.TestCase):
     """
     Test class for the access_nested_map function.
-    Checks that the function returns the correct value for different
-    nested maps and paths, and raises KeyError for invalid paths.
+    It checks that the function returns the correct value for different
+    nested maps and paths and raises KeyError for invalid paths.
     """
 
     @parameterized.expand([
@@ -26,8 +26,8 @@ class TestAccessNestedMap(unittest.TestCase):
     ])
     def test_access_nested_map(self, nested_map: dict, path: tuple, expected: Any) -> None:
         """
-        Test that access_nested_map returns the expected value
-        given a nested map and a sequence of keys representing the path.
+        Test that access_nested_map returns the expected value given a nested
+        map and a sequence of keys representing the path to the value.
         """
         self.assertEqual(access_nested_map(nested_map, path), expected)
 
@@ -37,7 +37,8 @@ class TestAccessNestedMap(unittest.TestCase):
     ])
     def test_access_nested_map_exception(self, nested_map: dict, path: tuple) -> None:
         """
-        Test that access_nested_map raises KeyError for invalid paths.
+        Test that access_nested_map raises KeyError for invalid paths
+        in nested maps.
         """
         with self.assertRaises(KeyError):
             access_nested_map(nested_map, path)
@@ -46,16 +47,16 @@ class TestAccessNestedMap(unittest.TestCase):
 class TestGetJson(unittest.TestCase):
     """
     Test class for the get_json function.
-    Mocks HTTP calls to test that get_json returns the expected payload
+    It mocks HTTP calls to test that get_json returns the expected payload
     without making real network requests.
     """
 
-    @patch("utils.requests.get")
     @parameterized.expand([
         ("example", "http://example.com", {"payload": True}),
         ("holberton", "http://holberton.io", {"payload": False}),
     ])
-    def test_get_json(self, name, test_url, test_payload, mock_get):
+    @patch("utils.requests.get")
+    def test_get_json(self, name: str, test_url: str, test_payload: dict, mock_get: Mock) -> None:
         """
         Test that get_json returns the expected dictionary for a given URL
         by mocking requests.get so no real HTTP call is made.
