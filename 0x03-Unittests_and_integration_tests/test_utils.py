@@ -9,7 +9,7 @@ import unittest
 from typing import Any
 from parameterized import parameterized
 from unittest.mock import patch, Mock
-from utils import access_nested_map, get_json,memoize
+from utils import access_nested_map, get_json, memoize
 
 
 class TestAccessNestedMap(unittest.TestCase):
@@ -24,7 +24,7 @@ class TestAccessNestedMap(unittest.TestCase):
         ({"a": {"b": 2}}, ("a",), {"b": 2}),
         ({"a": {"b": 2}}, ("a", "b"), 2),
     ])
-    def test_access_nested_map(self, nested_map: dict, path: tuple, expected: Any) -> None:
+    def test_access_nested_map(self, nested_map: dict, path: tuple, expected) -> None:
         """
         Test that access_nested_map returns the expected value given a nested
         map and a sequence of keys representing the path to the value.
@@ -35,7 +35,7 @@ class TestAccessNestedMap(unittest.TestCase):
         ({}, ('a',)),
         ({'a': 1}, ('a', 'b')),
     ])
-    def test_access_nested_map_exception(self, nested_map: dict, path: tuple) -> None:
+    def test_access_nested_map_exception(self, nested_map: dict, path) -> None:
         """
         Test that access_nested_map raises KeyError for invalid paths
         in nested maps.
@@ -99,3 +99,4 @@ class TestMemoize(unittest.TestCase):
 
             # Ensure a_method was called only once
             mock_method.assert_called_once()
+            
