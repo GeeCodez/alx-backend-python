@@ -71,6 +71,7 @@ class TestGetJson(unittest.TestCase):
 class TestMemoize(unittest.TestCase):
     """Unit test for the memoize decorator."""
 
+
     def test_memoize(self):
         """Test that a memoized method is called only once."""
 
@@ -99,4 +100,4 @@ class TestMemoize(unittest.TestCase):
 
             # Ensure a_method was called only once
             mock_method.assert_called_once()
-            
+
