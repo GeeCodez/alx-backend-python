@@ -48,5 +48,30 @@ class TestGithubOrgClient(unittest.TestCase):
 
             self.assertEqual(result, test_payload["repos_url"])
 
+    @patch("client.get_json")
+    def test_public_repos(self, mock_get_json):
+        """Test that public_repos returns the correct list of repos."""
+
+        # Mocked JSON returned by get_json()
+        mock_get_json.return_value = [
+            {"name": "repo1"},
+            {"name": "repo2"},
+            {"name": "repo3"}
+        ]
+
+        # Patch the _public_repos_url property so it returns a fixed URL
+        with patch("client.GithubOrgClient._public_repos_url", new="http://example.com"):
+
+            client = GithubOrgClient("google")
+            result = client.public_repos()
+
+            # Assertions
+            self.assertEqual(result, ["repo1", "repo2", "repo3"])
+
+            # Ensure get_json was called once with the fake URL
+            mock_get_json.assert_called_once_with("http://example.com")
+
+
+
 if __name__=="__main__":
     unittest.main()
