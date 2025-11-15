@@ -6,6 +6,7 @@ class User(AbstractUser):
     # Replace Django's default integer ID with UUID
     user_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     #first_name, lastname, username, and password are already in the Abstract user class
+    last_name=models.CharField(max_length=150, blank=True)
     phone_number=models.CharField(max_length=20,null=True,blank=True)
     ROLE_CHOICES = [
         ('guest', 'Guest'),
@@ -37,7 +38,7 @@ class Conversation(models.Model):
 
 
 class Message(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    message_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     conversation = models.ForeignKey(Conversation, related_name="messages", on_delete=models.CASCADE)
     sender = models.ForeignKey(User, related_name="sent_messages", on_delete=models.CASCADE)
     message_body = models.TextField()
@@ -49,4 +50,4 @@ class Message(models.Model):
         ]
 
     def __str__(self):
-        return f"Message {self.id} from {self.sender.email}"
+        return f"Message {self.message_id} from {self.sender.email}"
