@@ -38,3 +38,19 @@ class ConversationSerializer(serializers.ModelSerializer):
             "created_at",
             "messages",
         ]
+
+
+demo_charfield = serializers.CharField(required=False)
+
+# Example of SerializerMethodField
+class DemoSerializer(serializers.Serializer):
+    computed_value = serializers.SerializerMethodField()
+
+    def get_computed_value(self, obj):
+        return "ok"
+
+# Example of ValidationError
+def demo_validate(value):
+    if value == "invalid":
+        raise serializers.ValidationError("This is a demo validation error")
+    return value
