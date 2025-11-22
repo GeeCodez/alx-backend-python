@@ -4,7 +4,7 @@ from django.contrib.auth.models import AbstractUser
 
 class User(AbstractUser):
     # Replace Django's default integer ID with UUID
-    user_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user_id = models.AutoField(primary_key=True, editable=False)
     #first_name, lastname, username, and password are already in the Abstract user class
     last_name=models.CharField(max_length=150, blank=True)
     phone_number=models.CharField(max_length=20,null=True,blank=True)
@@ -26,7 +26,7 @@ class User(AbstractUser):
 
 
 class Conversation(models.Model):
-    conversation_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    conversation_id =models.AutoField(primary_key=True, editable=False)
 
     # A conversation has multiple participants (many-to-many users)
     participants = models.ManyToManyField(User, related_name='conversations')
@@ -38,7 +38,7 @@ class Conversation(models.Model):
 
 
 class Message(models.Model):
-    message_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    message_id=models.AutoField(primary_key=True, editable=False)
     conversation = models.ForeignKey(Conversation, related_name="messages", on_delete=models.CASCADE)
     sender = models.ForeignKey(User, related_name="sent_messages", on_delete=models.CASCADE)
     message_body = models.TextField()
