@@ -4,7 +4,7 @@ from django.contrib.auth.models import AbstractUser
 
 class User(AbstractUser):
     # Replace Django's default integer ID with UUID
-    id = models.AutoField(primary_key=True, editable=False)
+    user_id = models.AutoField(primary_key=True, editable=False)
     #first_name, lastname, username, and password are already in the Abstract user class
     last_name=models.CharField(max_length=150, blank=True)
     phone_number=models.CharField(max_length=20,null=True,blank=True)
