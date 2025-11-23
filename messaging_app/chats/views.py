@@ -1,7 +1,7 @@
-from rest_framework import viewsets, filters
-from rest_framework.response import Response
+from rest_framework import viewsets, filters,status,
 from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 
 from .models import Conversation, Message
 from .serializers import ConversationSerializer, MessageSerializer
@@ -19,7 +19,10 @@ class ConversationViewSet(viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
         participants = request.data.get("participants", [])
         if not participants or len(participants) < 1:
-            raise ValidationError("A conversation must have at least 2 participants.")
+            return Response(
+                {"detail": "A conversation must have at least 2 participants."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
         # Automatically add creator
         if request.user.user_id not in participants:
@@ -44,7 +47,10 @@ class MessageViewSet(viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
         conversation_id = request.data.get("conversation")
         if not conversation_id:
-            raise ValidationError("Conversation ID is required.")
+            return Response(
+                {"detail": "Conversation ID is required."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
         try:
             conversation = Conversation.objects.get(pk=conversation_id)
