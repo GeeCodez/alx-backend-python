@@ -21,7 +21,7 @@ class ConversationViewSet(viewsets.ModelViewSet):
         if not participants or len(participants) < 1:
             return Response(
                 {"detail": "A conversation must have at least 2 participants."},
-                status=status.HTTP_400_BAD_REQUEST
+                status=status.HTTP_403_FORBIDDEN
             )
 
         # Automatically add creator
@@ -49,7 +49,7 @@ class MessageViewSet(viewsets.ModelViewSet):
         if not conversation_id:
             return Response(
                 {"detail": "Conversation ID is required."},
-                status=status.HTTP_400_BAD_REQUEST
+                status=status.HTTP_403_FORBIDDEN
             )
 
         try:
