@@ -1,6 +1,12 @@
-from rest_framework.pagination import PageNumberPagination
+import django_filters
+from .models import Message
 
-class MessagePagination(PageNumberPagination):
-    page_size=20
-    page_size_query_param='page_size'
-    max_page_size=100
+class MessageFilter(django_filters.FilterSet):
+    sender = django_filters.NumberFilter(field_name="sender__id")
+    conversation = django_filters.NumberFilter(field_name="conversation__id")
+    start_date = django_filters.DateTimeFilter(field_name="timestamp", lookup_expr='gte')
+    end_date = django_filters.DateTimeFilter(field_name="timestamp", lookup_expr='lte')
+
+    class Meta:
+        model = Message
+        fields = ['sender', 'conversation', 'start_date', 'end_date']
