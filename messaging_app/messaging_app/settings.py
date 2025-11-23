@@ -140,3 +140,8 @@ REST_FRAMEWORK = {
 }
 
 AUTH_USER_MODEL = 'chats.User'
+
+SIMPLE_JWT = {
+    "USER_ID_FIELD": "user_id",
+    "USER_ID_CLAIM": "user_id",
+}

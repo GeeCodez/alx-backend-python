@@ -5,12 +5,12 @@ from rest_framework.permissions import IsAuthenticated
 
 from .models import Conversation, Message
 from .serializers import ConversationSerializer, MessageSerializer
-from .permissions import IsParticipant
+from .permissions import IsParticipantOfConversation
 
 
 class ConversationViewSet(viewsets.ModelViewSet):
     serializer_class = ConversationSerializer
-    permission_classes = [IsAuthenticated, IsParticipant]
+    permission_classes = [IsAuthenticated, IsParticipantOfConversation]
 
     def get_queryset(self):
         # Only conversations the user participates in
@@ -22,8 +22,8 @@ class ConversationViewSet(viewsets.ModelViewSet):
             raise ValidationError("A conversation must have at least 2 participants.")
 
         # Automatically add creator
-        if request.user.id not in participants:
-            participants.append(request.user.id)
+        if request.user.user_id not in participants:
+            participants.append(request.user.user_id)
 
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -34,7 +34,7 @@ class ConversationViewSet(viewsets.ModelViewSet):
 
 class MessageViewSet(viewsets.ModelViewSet):
     serializer_class = MessageSerializer
-    permission_classes = [IsAuthenticated, IsParticipant]
+    permission_classes = [IsAuthenticated, IsParticipantOfConversation]
     filter_backends = [filters.OrderingFilter]
     ordering = ['timestamp']
 
