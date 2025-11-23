@@ -1,11 +1,13 @@
-from rest_framework import viewsets, filters,status,
+from rest_framework import viewsets, filters,status
 from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
+from .pagination import MessagePagination
 from .models import Conversation, Message
 from .serializers import ConversationSerializer, MessageSerializer
 from .permissions import IsParticipantOfConversation
+from .filters import MessageFilter
 
 
 class ConversationViewSet(viewsets.ModelViewSet):
@@ -36,9 +38,11 @@ class ConversationViewSet(viewsets.ModelViewSet):
 
 
 class MessageViewSet(viewsets.ModelViewSet):
+    pagination_class=MessagePagination
     serializer_class = MessageSerializer
     permission_classes = [IsAuthenticated, IsParticipantOfConversation]
     filter_backends = [filters.OrderingFilter]
+    filterset_class=MessageFilter
     ordering = ['timestamp']
 
     def get_queryset(self):
