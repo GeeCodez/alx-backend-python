@@ -6,3 +6,5 @@
 2025-11-23 13:18:56.003287 - User: admin@example.com - Path: /admin/
 2025-11-23 13:19:04.434417 - User: admin@example.com - Path: /admin/chats/user/4/change/
 2025-11-23 13:19:04.704882 - User: admin@example.com - Path: /admin/jsi18n/
+2025-11-23 14:03:14.981524 - User: admin@example.com - Path: /api/conversations
+2025-11-23 14:03:15.086977 - User: admin@example.com - Path: /api/conversations/
