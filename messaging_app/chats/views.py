@@ -2,6 +2,7 @@ from rest_framework import viewsets, filters,status
 from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from django_filters.rest_framework import DjangoFilterBackend
 
 from .pagination import MessagePagination
 from .models import Conversation, Message
@@ -41,7 +42,7 @@ class MessageViewSet(viewsets.ModelViewSet):
     pagination_class=MessagePagination
     serializer_class = MessageSerializer
     permission_classes = [IsAuthenticated, IsParticipantOfConversation]
-    filter_backends = [filters.OrderingFilter]
+    filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
     filterset_class=MessageFilter
     ordering = ['timestamp']
 
