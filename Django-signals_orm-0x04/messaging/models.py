@@ -2,6 +2,13 @@
 from django.db import models
 from django.conf import settings
 
+
+class UnreadMessagesManager(models.Manager):
+    def for_user(self, user):
+        return self.get_queryset().filter(
+            receiver=user,
+            read=False
+        ).only("id", "content", "sender", "timestamp")
 class Message(models.Model):
     sender = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -16,6 +23,10 @@ class Message(models.Model):
     edited=models.BooleanField(default=False)
     content = models.TextField()
     timestamp = models.DateTimeField(auto_now_add=True)
+    read=models.BooleanField(default=False)
+    objects = models.Manager()              # default manager
+    unread = UnreadMessagesManager()        # custom manager
+
     edited_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
