@@ -1,14 +1,7 @@
 # messages/models.py
 from django.db import models
 from django.conf import settings
-
-
-class UnreadMessagesManager(models.Manager):
-    def for_user(self, user):
-        return self.get_queryset().filter(
-            receiver=user,
-            read=False
-        ).only("id", "content", "sender", "timestamp")
+from .managers import UnreadMessagesManager
 class Message(models.Model):
     sender = models.ForeignKey(
         settings.AUTH_USER_MODEL,

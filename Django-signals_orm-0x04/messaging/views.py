@@ -42,8 +42,22 @@ def conversation_list(request):
 
 @login_required
 def unread_inbox(request):
-    unread_messages = Message.unread.for_user(request.user)
+    """
+    Use the custom manager to get unread messages for the logged-in user.
+    Optimize by selecting only necessary fields with .only()
+    """
+    unread_qs = Message.unread.unread_for_user(request.user).only(
+        "id", "content", "sender", "timestamp", "parent_message"
+    ).select_related("sender", "parent_message")
+
+    # Optional: prefetch replies for these unread messages if needed
+    unread_qs = unread_qs.prefetch_related(
+        Prefetch(
+            "replies",
+            queryset=Message.objects.select_related("sender").only("id", "content", "sender", "timestamp", "parent_message")
+        )
+    )
 
     return render(request, "messaging/unread_inbox.html", {
-        "messages": unread_messages
+        "messages": unread_qs
     })
