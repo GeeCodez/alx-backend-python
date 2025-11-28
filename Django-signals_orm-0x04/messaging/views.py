@@ -2,7 +2,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect,render
 from django.contrib import messages
-from django.db.models import Prefetch
+from django.db.models import Prefetch, Q
 from .models import Message
 
 User=get_user_model
@@ -19,20 +19,21 @@ def delete_user(request):
 
 @login_required
 def conversation_list(request):
-    # Top-level messages only
+
     messages_qs = Message.objects.filter(
-        receiver=request.user,
+        Q(sender=request.user) | Q(receiver=request.user),
         parent_message=None
     ).select_related(
-        "sender", "receiver"
+        "sender",
+        "receiver",
+        "parent_message"
     ).prefetch_related(
         Prefetch(
             "replies",
-            queryset=Message.objects.select_related("sender", "receiver")
+            queryset=Message.objects.select_related("sender", "receiver", "parent_message")
         )
     )
 
-    # Convert queryset into threaded structure
     conversations = [msg.get_thread() for msg in messages_qs]
 
     return render(request, "messaging/conversation_list.html", {
