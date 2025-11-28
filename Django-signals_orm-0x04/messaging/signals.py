@@ -33,6 +33,6 @@ def delete_user_related_data(sender,instance,**kwargs):
     Message.objects.filter(sender=instance).delete()
     Message.objects.filter(receiver=instance).delete()
 
-    Notification.objects.filter(User=instance)
+    Notification.objects.filter(User=instance).delete()
     MessageHistory.objects.filter(message__sender=instance).delete()
     MessageHistory.objects.filter(message__receiver=instance).delete()

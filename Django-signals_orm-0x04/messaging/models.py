@@ -23,6 +23,27 @@ class Message(models.Model):
         blank=True,
         related_name='edited_messages'
     )
+    parent_message = models.ForeignKey(
+        'self',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='replies'
+    )
+    def get_thread(self):
+        thread = {
+            "message": self,
+            "replies": []
+        }
+
+        replies = self.replies.all().select_related("sender", "receiver")
+
+        for reply in replies:
+            thread["replies"].append(reply.get_thread())
+
+        return thread
+
+
 
     def __str__(self):
         return f"From {self.sender} to {self.receiver} at {self.timestamp}"
