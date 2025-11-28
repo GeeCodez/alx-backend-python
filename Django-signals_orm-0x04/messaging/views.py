@@ -2,6 +2,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect,render
 from django.contrib import messages
+from django.views.decorators.cache import cache_page
 from django.db.models import Prefetch, Q
 from .models import Message
 
@@ -18,6 +19,7 @@ def delete_user(request):
 
 
 @login_required
+@cache_page(60)
 def conversation_list(request):
 
     messages_qs = Message.objects.filter(
@@ -61,3 +63,4 @@ def unread_inbox(request):
     return render(request, "messaging/unread_inbox.html", {
         "messages": unread_qs
     })
+
