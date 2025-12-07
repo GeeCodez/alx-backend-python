@@ -1,0 +1,33 @@
+# Python
+*.pyc
+*.pyo
+__pycache__/
+*.pyd
+*.sqlite3
+*.env
+*.log
+
+# Django
+*.pot
+*.py[cod]
+db.sqlite3
+/staticfiles/
+media/
+
+# Virtual environment
+venv/
+env/
+ENV/
+.venv_messaging
+
+# VS Code
+.vscode/
+
+# Docker
+*.dockerignore
+docker-compose.override.yml
+*.log
+**/postgres_data/
+
+# MacOS
+.DS_Store
