@@ -1,35 +1,38 @@
-version: '3.9'
+version '3.9'
 
 services:
-  db:
-    image: postgres:15
-    container_name: messaging_db
-    restart: always
-    environment:
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
+    db:
+        image: mysql:8.0
+        container_name: messaging_db
+        restart: always
+        environment:
+            MYSQL_DATABASE: ${MYSQL_DATABASE}
+            MYSQL_USER: ${MYSQL_USER}
+            MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+            MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+        ports:
+            -"3306:3306"
+        volumes:
+            -"mysql_data:/var/lib/mysql"
 
-  web:
-    build: .
-    container_name: messaging_web
-    command: python manage.py runserver 0.0.0.0:8000
-    volumes:
-      - .:/app
-    ports:
-      - "8000:8000"
-    environment:
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_HOST: ${POSTGRES_HOST}
-      POSTGRES_PORT: ${POSTGRES_PORT}
-    depends_on:
-      - db
+    web:
+        build: .
+        container_name: messaging_web
+        command: python manage.py runserver 0.0.0.0:8000
+        volumes: 
+            - .:/app
+        ports:
+            - "8000:8000"
+        environment:
+            MYSQL_DATABASE: ${MYSQL_DATABASE}
+            MYSQL_USER: ${MYSQL_USER}
+            MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+            MYSQL_HOST: ${MYSQL_HOST}
+            MYSQL_PORT: ${MYSQL_PORT}
+        depends_on:
+            - db
 
 volumes:
-  postgres_data:
+    mysql_data:
+
+python3 manage.py runserver
