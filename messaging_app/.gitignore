@@ -18,7 +18,7 @@ media/
 venv/
 env/
 ENV/
-.venv_messaging
+.venv_messaging/
 
 # VS Code
 .vscode/
