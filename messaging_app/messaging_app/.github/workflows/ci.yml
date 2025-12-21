@@ -45,13 +45,32 @@ jobs:
         . venv/bin/activate
         pip install --upgrade pip
         pip install -r messaging_app/requirements.txt
+        pip install flake8 coverage pytest-cov
+
+    - name: Run Linting (flake8)
+      run: |
+        . venv/bin/activate
+        flake8 messaging_app
+      # Fail the job if linting errors are found
 
     - name: Run migrations
       run: |
         . venv/bin/activate
         python messaging_app/manage.py migrate
 
-    - name: Run tests
+    - name: Run tests with coverage
       run: |
         . venv/bin/activate
-        pytest messaging_app --ds=messaging_app.settings
+        coverage run -m pytest messaging_app --ds=messaging_app.settings
+
+    - name: Generate coverage report
+      run: |
+        . venv/bin/activate
+        coverage xml -o coverage.xml
+        coverage report
+
+    - name: Upload coverage report as artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: coverage-report
+        path: coverage.xml
