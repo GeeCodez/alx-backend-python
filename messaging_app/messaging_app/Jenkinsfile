@@ -61,3 +61,47 @@ pipeline {
 }
 
 ["messaging_app/requirements.txt", "pip3 install"]
+
+pipeline {
+    agent any
+
+    environment {
+        // Docker Hub credentials ID in Jenkins
+        DOCKERHUB_CREDENTIALS = 'DOCKERHUB_CREDENTIALS_ID'
+        // Docker image name and tag
+        DOCKER_IMAGE = 'yourdockerhubusername/messaging-app:latest'
+    }
+
+    stages {
+        stage('Build Docker Image') {
+            steps {
+                echo 'Building Docker image...'
+                sh """
+                    cd messaging_app
+                    docker build -t ${DOCKER_IMAGE} .
+                """
+            }
+        }
+
+        stage('Push Docker Image') {
+            steps {
+                echo 'Pushing Docker image to Docker Hub...'
+                withCredentials([usernamePassword(credentialsId: "${DOCKERHUB_CREDENTIALS}", usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                    sh """
+                        echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
+                        docker push ${DOCKER_IMAGE}
+                    """
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Docker image built and pushed successfully!'
+        }
+        failure {
+            echo 'Docker build or push failed. Check logs for details.'
+        }
+    }
+}
