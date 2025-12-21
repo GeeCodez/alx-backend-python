@@ -1,0 +1,61 @@
+pipeline {
+    agent any
+
+    environment {
+        // Replace with your Jenkins GitHub credentials ID
+        GITHUB_CREDENTIALS = 'GITHUB_CREDENTIALS_ID'
+        // Path for virtual environment
+        VENV_PATH = 'venv'
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                echo 'Pulling code from GitHub...'
+                git credentialsId: "${GITHUB_CREDENTIALS}", url: 'https://github.com/yourusername/messaging-app.git'
+            }
+        }
+
+        stage('Setup Python Environment') {
+            steps {
+                echo 'Creating virtual environment and installing dependencies...'
+                sh """
+                    python3 -m venv ${VENV_PATH}
+                    . ${VENV_PATH}/bin/activate
+                    pip install --upgrade pip
+                    pip install -r requirements.txt
+                """
+            }
+        }
+
+        stage('Run Tests') {
+            steps {
+                echo 'Running pytest...'
+                sh """
+                    . ${VENV_PATH}/bin/activate
+                    pytest --junitxml=report.xml
+                """
+            }
+        }
+
+        stage('Archive Test Report') {
+            steps {
+                echo 'Archiving test results...'
+                junit 'report.xml'
+            }
+        }
+    }
+
+    post {
+        always {
+            echo 'Cleaning up virtual environment...'
+            sh "rm -rf ${VENV_PATH}"
+        }
+        success {
+            echo 'Pipeline completed successfully!'
+        }
+        failure {
+            echo 'Pipeline failed. Check test reports for details.'
+        }
+    }
+}
