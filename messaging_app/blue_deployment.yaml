@@ -16,6 +16,6 @@ spec:
     spec:
       containers:
         - name: messaging-app
-          image: yourdockerhubusername/messaging_app:latest
+          image: geecodez/messaging_app:2.0
           ports:
             - containerPort: 8000

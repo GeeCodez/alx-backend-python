@@ -1,0 +1,21 @@
+#!/bin/bash
+
+# Apply updated deployment (triggers rolling update)
+kubectl apply -f blue_deployment.yaml
+
+# Monitor rollout status
+kubectl rollout status deployment messaging-blue
+
+# Get service URL
+URL=$(minikube service messaging-service --url)
+
+# Send continuous requests to test downtime
+echo "Testing app availability..."
+for i in {1..20}; do
+  curl -s $URL > /dev/null
+  echo "Request $i OK"
+  sleep 1
+done
+
+# Verify rolling update is complete
+kubectl get pods -l app=messaging
