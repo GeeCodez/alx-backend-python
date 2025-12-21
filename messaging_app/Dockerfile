@@ -2,7 +2,7 @@
 FROM python:3.10
 
 # Step 2- set working directory
-WORKDIR / app
+WORKDIR /app
 
 # Step 3- copy requirements.txt to the contaner
 COPY requirements.txt .
@@ -14,7 +14,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # Step 6- Expose the django port
-EXPOSE -p 8000
+EXPOSE 8000
 
 # Step 7- run the django development server
 CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
