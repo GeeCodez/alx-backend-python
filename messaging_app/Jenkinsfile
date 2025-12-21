@@ -1,6 +1,6 @@
 pipeline {
     agent any
-
+    git branch: 'main'
     environment {
         // Replace with your Jenkins GitHub credentials ID
         GITHUB_CREDENTIALS = 'GITHUB_CREDENTIALS_ID'
@@ -60,3 +60,5 @@ pipeline {
         }
     }
 }
+
+CMD ["messaging_app/requirements.txt", "pip3 install"]
