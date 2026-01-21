@@ -1,76 +1,100 @@
-name: Django CI
+name: Django CI/CD Pipeline
 
+# When to run this workflow
 on:
   push:
-    branches: [ main ]
+    branches: [ main, develop ]
+    paths:
+      - 'messaging_app/**'
   pull_request:
-    branches: [ main ]
+    branches: [ main, develop ]
+    paths:
+      - 'messaging_app/**'
+
+# Environment variables available to all jobs
+env:
+  PYTHON_VERSION: '3.11'
+  DJANGO_SETTINGS_MODULE: 'your_project_name.settings'
 
 jobs:
   test:
+    name: Run Tests
     runs-on: ubuntu-latest
+    
+    # MySQL service container
     services:
       mysql:
-        image: mysql:8
+        image: mysql:8.0
         env:
           MYSQL_ROOT_PASSWORD: rootpassword
           MYSQL_DATABASE: test_db
+          MYSQL_USER: testuser
+          MYSQL_PASSWORD: testpass
         ports:
           - 3306:3306
         options: >-
-          --health-cmd="mysqladmin ping --silent"
+          --health-cmd="mysqladmin ping"
           --health-interval=10s
           --health-timeout=5s
           --health-retries=3
-
-    env:
-      DATABASE_NAME: test_db
-      DATABASE_USER: root
-      DATABASE_PASSWORD: rootpassword
-      DATABASE_HOST: 127.0.0.1
-      DATABASE_PORT: 3306
-
+    
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
-
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.11'
-
-    - name: Install dependencies
-      run: |
-        python -m venv venv
-        . venv/bin/activate
-        pip install --upgrade pip
-        pip install -r messaging_app/requirements.txt
-        pip install flake8 coverage pytest-cov
-
-    - name: Run Linting (flake8)
-      run: |
-        . venv/bin/activate
-        flake8 messaging_app
-      # Fail the job if linting errors are found
-
-    - name: Run migrations
-      run: |
-        . venv/bin/activate
-        python messaging_app/manage.py migrate
-
-    - name: Run tests with coverage
-      run: |
-        . venv/bin/activate
-        coverage run -m pytest messaging_app --ds=messaging_app.settings
-
-    - name: Generate coverage report
-      run: |
-        . venv/bin/activate
-        coverage xml -o coverage.xml
-        coverage report
-
-    - name: Upload coverage report as artifact
-      uses: actions/upload-artifact@v3
-      with:
-        name: coverage-report
-        path: coverage.xml
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+      
+      - name: Install dependencies
+        working-directory: ./messaging_app
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-django pytest-cov
+      
+      - name: Wait for MySQL
+        run: |
+          while ! mysqladmin ping -h"127.0.0.1" --silent; do
+            sleep 1
+          done
+      
+      - name: Run migrations
+        working-directory: ./messaging_app
+        env:
+          DATABASE_URL: mysql://testuser:testpass@127.0.0.1:3306/test_db
+        run: |
+          python manage.py migrate --noinput
+      
+      - name: Run tests
+        working-directory: ./messaging_app
+        env:
+          DATABASE_URL: mysql://testuser:testpass@127.0.0.1:3306/test_db
+        run: |
+          pytest --junit-xml=test-results/results.xml \
+                 --cov=. \
+                 --cov-report=xml \
+                 --cov-report=html \
+                 --cov-report=term
+      
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: messaging_app/test-results/
+      
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: messaging_app/htmlcov/
+      
+      - name: Comment coverage on PR
+        if: github.event_name == 'pull_request'
+        uses: py-cov-action/python-coverage-comment-action@v3
+        with:
+          GITHUB_TOKEN: ${{ github.token }}
