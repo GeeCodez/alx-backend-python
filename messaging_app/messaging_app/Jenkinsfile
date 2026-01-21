@@ -1,65 +1,118 @@
-pipeline{
+pipeline {
     agent none
-
-    environment{
-        PYTHONBUFFERED='1'
+    
+    environment {
+        PYTHONUNBUFFERED = '1'
+        DOCKER_IMAGE = 'geecodez/messaging-app'
+        IMAGE_TAG = "${BUILD_NUMBER}"
     }
-
-    stages{
-        stage('Checkout Code'){
-            agent any 
+    
+    stages {
+        stage('Checkout Code') {
+            agent any
             steps {
-                echo "Pulling code from github ..."
-                checkout scm
+                echo 'Pulling code from GitHub...'
+                git branch: 'main',
+                    credentialsId: 'github-credentials',
+                    url: 'https://github.com/geecodez/alx-backend-python'
             }
         }
-
-        stage('Run tests'){
+        
+        stage('Install Dependencies') {
             agent {
                 docker {
                     image 'python:3.11-slim'
                     args '-u root'
                 }
             }
-            steps{
-                echo 'Running pytest tests....'
-                sh '''
-                    pip install --upgrade pip
-                    pip install -r requirements.txt
-                    pip install pytest pytest-django pytest-cov
-
-                    mkdir -p test-results
-
-                    pytest --junit-xml=test-results/results.xml --cov=. --cov-report=html || true
+            steps {
+                dir('messaging_app') {
+                    echo 'Installing Python dependencies...'
+                    sh '''
+                        pip3 install --upgrade pip
+                        pip3 install --no-cache-dir -r requirements.txt
+                        pip3 install pytest pytest-django pytest-cov
                     '''
+                }
             }
         }
-
-        stage('Generate Reports'){
-            agent any 
-            steps{
-                echo "Publishing test results...."
-                junit 'test-results/results.xml'
-
-                publishHTML([
-                    reportDIR: 'htmlcov',
-                    reportFiles: 'index.html',
-                    reportName: 'Coverage Report'
-                ])
+        
+        stage('Run Tests') {
+            agent {
+                docker {
+                    image 'python:3.11-slim'
+                    args '-u root'
+                }
+            }
+            steps {
+                dir('messaging_app') {
+                    echo 'Running pytest...'
+                    sh '''
+                        pip3 install --upgrade pip
+                        pip3 install --no-cache-dir -r requirements.txt
+                        pip3 install pytest pytest-django pytest-cov
+                        
+                        mkdir -p ../test-results
+                        
+                        pytest --junit-xml=../test-results/results.xml \
+                               --cov=. \
+                               --cov-report=html \
+                               --cov-report=term
+                    '''
+                }
+            }
+        }
+        
+        stage('Build Docker Image') {
+            agent any
+            steps {
+                echo 'Building Docker image...'
+                script {
+                    sh """
+                        docker build -t ${DOCKER_IMAGE}:${IMAGE_TAG} ./messaging_app
+                        docker tag ${DOCKER_IMAGE}:${IMAGE_TAG} ${DOCKER_IMAGE}:latest
+                    """
+                }
+            }
+        }
+        
+        stage('Push to Docker Hub') {
+            agent any
+            environment {
+                DOCKER_CREDS = credentials('dockerhub-credentials')
+            }
+            steps {
+                echo 'Pushing to Docker Hub...'
+                script {
+                    sh """
+                        echo \$DOCKER_CREDS_PSW | docker login -u \$DOCKER_CREDS_USR --password-stdin
+                        docker push ${DOCKER_IMAGE}:${IMAGE_TAG}
+                        docker push ${DOCKER_IMAGE}:latest
+                        docker logout
+                    """
+                }
             }
         }
     }
-
+    
     post {
-        always{
-            echo "cleaning up workspace...."
+        always {
+            echo 'Publishing reports and cleaning up...'
+            junit 'test-results/results.xml'
+            publishHTML([
+                reportDir: 'messaging_app/htmlcov',
+                reportFiles: 'index.html',
+                reportName: 'Coverage Report',
+                allowMissing: true
+            ])
             cleanWs()
         }
-        succes{
-            echo "Pipeline completed successfully"
+        success {
+            echo "✅ Build ${BUILD_NUMBER} succeeded!"
+            echo "Image: ${DOCKER_IMAGE}:${IMAGE_TAG}"
         }
-        failure{
-            echo "Pipeline failed - check logs above"
+        failure {
+            echo "❌ Build ${BUILD_NUMBER} failed!"
         }
     }
 }
