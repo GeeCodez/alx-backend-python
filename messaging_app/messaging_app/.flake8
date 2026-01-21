@@ -1,0 +1,23 @@
+[flake8]
+# Ignore specific errors
+ignore = 
+    E203,  # Whitespace before ':'
+    W503,  # Line break before binary operator
+    E501,  # Line too long (we check this separately with --max-line-length)
+
+# Exclude files/folders from checking
+exclude = 
+    migrations/,
+    __pycache__,
+    manage.py,
+    settings.py,
+    */migrations/*,
+    */tests/*,
+    venv/,
+    env/
+
+# Maximum line length
+max-line-length = 127
+
+# Maximum complexity
+max-complexity = 10
