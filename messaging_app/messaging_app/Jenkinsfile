@@ -1,37 +1,65 @@
-pipelin {
-    agent any
+pipeline{
+    agent none
+
+    environment{
+        PYTHONBUFFERED='1'
+    }
 
     stages{
-        stage("Clone Repo"){
+        stage('Checkout Code'){
+            agent any 
             steps {
-                git credentials: 'github-creds',
-                    url: 'https://github.com/geecodez/alx-backend-python/messaging_app.git'
+                echo "Pulling code from github ..."
+                checkout scm
             }
         }
 
-        stage("Install Dependencies"){
+        stage('Run tests'){
+            agent {
+                docker {
+                    image 'python:3.11-slim'
+                    args '-u root'
+                }
+            }
             steps{
+                echo 'Running pytest tests....'
                 sh '''
-                python3 -m venv venv
-                . venv/bin/activate
-                pip install -r requirements.txt
-                '''
+                    pip install --upgrade pip
+                    pip install -r requirements.txt
+                    pip install pytest pytest-django pytest-cov
+
+                    mkdir -p test-results
+
+                    pytest --junit-xml=test-results/results.xml --cov=. --cov-report=html || true
+                    '''
             }
         }
 
-        stage('Run Tests'){
+        stage('Generate Reports'){
+            agent any 
             steps{
-                sh '''
-                . venv/bin/activate
-                pytest --junitxml=test-results.xml
-                '''
+                echo "Publishing test results...."
+                junit 'test-results/results.xml'
+
+                publishHTML([
+                    reportDIR: 'htmlcov',
+                    reportFiles: 'index.html',
+                    reportName: 'Coverage Report'
+                ])
             }
         }
     }
 
     post {
-        always {
-            junit 'test-results.xml'
+        always{
+            echo "cleaning up workspace...."
+            cleanWs()
+        }
+        succes{
+            echo "Pipeline completed successfully"
+        }
+        failure{
+            echo "Pipeline failed - check logs above"
         }
     }
 }
